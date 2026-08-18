@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Package, LayoutDashboard, BarChart3, Moon, Sun, History, Bell, Shield } from 'lucide-react';
+import { LayoutDashboard, Package, Activity, Bell, Shield, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
-import { useInventory } from '../context/InventoryContext';
+import { useEngine } from '../context/EngineContext';
 import { UserRole } from '../types';
 
 interface LayoutProps {
@@ -12,18 +12,17 @@ interface LayoutProps {
 
 export default function Layout({ children, activeTab, setActiveTab }: LayoutProps) {
   const { theme, toggleTheme } = useTheme();
-  const { items, role, setRole } = useInventory();
+  const { inventory, orders, role, setRole } = useEngine();
   const [showNotifications, setShowNotifications] = useState(false);
 
-  const lowStockItems = items.filter(item => item.quantity <= item.minThreshold && item.quantity > 0);
-  const outOfStockItems = items.filter(item => item.quantity === 0);
-  const totalAlerts = lowStockItems.length + outOfStockItems.length;
+  const exceptions = orders.filter(o => o.status === 'Exception: Stock');
+  const lowStock = inventory.filter(i => i.status !== 'In Stock');
+  const totalAlerts = exceptions.length + lowStock.length;
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'inventory', label: 'Inventory', icon: Package },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'history', label: 'Activity Logs', icon: History },
+    { id: 'active-orders', label: 'Active Orders', icon: LayoutDashboard },
+    { id: 'inventory-health', label: 'Inventory Health', icon: Package },
+    { id: 'control-tower', label: 'Control Tower', icon: Activity },
   ];
 
   return (
@@ -31,7 +30,7 @@ export default function Layout({ children, activeTab, setActiveTab }: LayoutProp
       {/* Sidebar */}
       <aside className="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col">
         <div className="h-16 flex items-center px-6 border-b border-slate-200 dark:border-slate-700">
-          <Package className="h-6 w-6 text-indigo-600 dark:text-indigo-400 mr-2" />
+          <Activity className="h-6 w-6 text-indigo-600 dark:text-indigo-400 mr-2" />
           <span className="font-bold text-lg tracking-tight">Smart Warehouse</span>
         </div>
         <nav className="flex-1 px-4 py-6 space-y-2">
@@ -58,7 +57,6 @@ export default function Layout({ children, activeTab, setActiveTab }: LayoutProp
           <h1 className="text-xl font-semibold capitalize">{activeTab.replace('-', ' ')}</h1>
           
           <div className="flex items-center space-x-4">
-            {/* RBAC Switcher */}
             <div className="flex items-center bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
               <Shield className="h-4 w-4 text-slate-500 ml-2" />
               <select 
@@ -72,7 +70,6 @@ export default function Layout({ children, activeTab, setActiveTab }: LayoutProp
               </select>
             </div>
 
-            {/* Notifications */}
             <div className="relative">
               <button onClick={() => setShowNotifications(!showNotifications)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors relative">
                 <Bell className="h-5 w-5 text-slate-600 dark:text-slate-300" />
@@ -86,20 +83,20 @@ export default function Layout({ children, activeTab, setActiveTab }: LayoutProp
               
               {showNotifications && (
                 <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 z-50">
-                  <div className="p-4 border-b border-slate-200 dark:border-slate-700 font-semibold">Alerts</div>
+                  <div className="p-4 border-b border-slate-200 dark:border-slate-700 font-semibold">System Alerts</div>
                   <div className="max-h-64 overflow-y-auto">
                     {totalAlerts === 0 ? (
-                      <p className="p-4 text-sm text-slate-500 text-center">No alerts right now.</p>
+                      <p className="p-4 text-sm text-slate-500 text-center">Systems nominal.</p>
                     ) : (
                       <div className="p-2 space-y-1">
-                        {outOfStockItems.map(item => (
-                          <div key={item.id} className="p-2 text-sm rounded bg-rose-50 dark:bg-rose-900/20 text-rose-800 dark:text-rose-300">
-                            <strong>{item.name}</strong> is out of stock!
+                        {exceptions.map(ex => (
+                          <div key={ex.id} className="p-2 text-sm rounded bg-rose-50 dark:bg-rose-900/20 text-rose-800 dark:text-rose-300">
+                            <strong>Order Exception:</strong> {ex.id} lacks stock allocation!
                           </div>
                         ))}
-                        {lowStockItems.map(item => (
+                        {lowStock.map(item => (
                           <div key={item.id} className="p-2 text-sm rounded bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300">
-                            <strong>{item.name}</strong> is low ({item.quantity} left, threshold: {item.minThreshold}).
+                            <strong>Low Stock:</strong> {item.name} ({item.quantity} left).
                           </div>
                         ))}
                       </div>
@@ -109,7 +106,6 @@ export default function Layout({ children, activeTab, setActiveTab }: LayoutProp
               )}
             </div>
 
-            {/* Theme Toggle */}
             <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
               {theme === 'dark' ? <Sun className="h-5 w-5 text-slate-400" /> : <Moon className="h-5 w-5 text-slate-600" />}
             </button>
@@ -123,4 +119,4 @@ export default function Layout({ children, activeTab, setActiveTab }: LayoutProp
       </main>
     </div>
   );
-}
+}\n

@@ -2,15 +2,15 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import { InventoryProvider } from './context/InventoryContext.tsx'
+import { EngineProvider } from './context/EngineContext.tsx'
 import { ThemeProvider } from './context/ThemeContext.tsx'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider>
-      <InventoryProvider>
+      <EngineProvider>
         <App />
-      </InventoryProvider>
+      </EngineProvider>
     </ThemeProvider>
   </React.StrictMode>,
-)
+)\n

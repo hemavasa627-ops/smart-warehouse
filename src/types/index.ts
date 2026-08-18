@@ -8,16 +8,37 @@ export interface InventoryItem {
   location: string;
   status: 'In Stock' | 'Low Stock' | 'Out of Stock';
   lastUpdated: string;
+  dailyUsageRate: number;
+  damagedQuantity: number;
 }
 
 export type UserRole = 'Admin' | 'Manager' | 'Worker';
 
 export interface LogEntry {
   id: string;
-  action: 'ADD' | 'UPDATE' | 'DELETE' | 'SCAN' | 'EXPORT';
+  action: 'ADD' | 'UPDATE' | 'DELETE' | 'SCAN' | 'EXPORT' | 'ALLOCATE' | 'EXCEPTION' | 'DISPATCH' | 'REORDER';
   details: string;
   timestamp: string;
   userRole: UserRole;
+}
+
+export type OrderStatus = 'Created' | 'Priority Assigned' | 'Stock Allocated' | 'Picking' | 'Packing' | 'QC' | 'Dispatched' | 'Exception: Stock';
+export type Priority = 'NORMAL' | 'URGENT' | 'UNASSIGNED';
+
+export interface OrderItem {
+  sku: string;
+  name: string;
+  quantity: number;
+}
+
+export interface Order {
+  id: string;
+  customer: string;
+  items: OrderItem[];
+  status: OrderStatus;
+  priority: Priority;
+  deadline: string; // ISO string
+  timestamps: Partial<Record<OrderStatus, string>>;
 }
 
 export interface FulfillmentData {
@@ -25,4 +46,4 @@ export interface FulfillmentData {
   fulfilled: number;
   unfulfilled: number;
   rate: number;
-}
+}\n
