@@ -46,4 +46,4 @@ export interface FulfillmentData {
   fulfilled: number;
   unfulfilled: number;
   rate: number;
-}\n
+}

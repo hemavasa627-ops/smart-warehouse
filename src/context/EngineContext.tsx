@@ -189,4 +189,4 @@ export const useEngine = () => {
   const context = useContext(EngineContext);
   if (!context) throw new Error('useEngine must be used within EngineProvider');
   return context;
-};\n
+};
